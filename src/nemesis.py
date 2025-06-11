@@ -9,7 +9,7 @@ def main():
     log_info("NEMESIS running");
 
     try:
-        process_handler.detection_by_process_name();
+        process_handler.scan_processes();
     except KeyboardInterrupt:
         log_info("NEMESIS says: I will come back.");
 
