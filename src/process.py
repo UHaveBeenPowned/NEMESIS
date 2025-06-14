@@ -1,6 +1,7 @@
 import collections
 import time
 import psutil
+
 from utils.logger import log_info, log_error
 from utils.hash import Hasher, SHAType
 
