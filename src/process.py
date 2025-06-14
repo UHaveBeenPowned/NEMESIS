@@ -1,6 +1,10 @@
 import collections
+import threading
 import time
+import os
 import psutil
+import signal
+import sys
 
 from utils.logger import log_info, log_error
 from utils.hash import Hasher, SHAType
@@ -14,8 +18,14 @@ class ProcessHandler:
         self._interval:               int = interval;
         self._permited_processes:     int = permited_processes;
         self._permited_files_accesed: int = permited_files_accesed;
+
+        self._malware_paths: list[str] = [];
+        self._monitor_thread = None;
+        self._malware_event = threading.Event();
+        signal.signal(signal.SIGINT, self.__signal_handler)
+
         self._jigsaw_processes_names: list[str] = ["firefox.exe", "drpbx.exe", "jigsaw.exe", "host.exe"];
-        self._malware_hashes = ["3ae96f73d805e1d3995253db4d910300d8442ea603737a1428b613061e7f61e7", "5973578d37bb09686acc82b2677ea29401409757843bdd685c1773cf93d63d8c"];
+        self._malware_hashes = ["3ae96f73d805e1d3995253db4d910300d8442ea603737a1428b613061e7f61e7"];
     
     def set_interval(self, interval: int):
         self._interval = interval;
@@ -26,13 +36,20 @@ class ProcessHandler:
     def set_permited_files_accesed(self, permited_files_accesed: int):
         self._permited_files_accesed = permited_files_accesed;
 #public
-    def scan_processes (self):
-        while True:
+    def start_monitor(self):
+        self._monitor_thread = threading.Thread(target=self.__scan_processes, daemon=True);
+        self._monitor_thread.start();
+#private
+    def __signal_handler(self, sig, frame):
+        self.__stop()
+
+    def __scan_processes (self):
+        while not self._malware_event.is_set():
             processes = list(psutil.process_iter(['pid', 'name', 'exe']));
             processes_pids = collections.defaultdict(list);
 
             self.__detection_by_process_name(processes, processes_pids);
-            self.__detection_by_process_count(processes, processes_pids);
+            self.__detection_by_process_count(processes_pids);
             self.__detection_by_process_hash(processes);
             time.sleep(self._interval);
 
@@ -41,43 +58,68 @@ class ProcessHandler:
             try:
                 name: str = process.info['name'];
                 pid: int = process.info['pid'];
-                processes_pids[name].append(pid)
+                processes_pids[name].append(pid);
 
-                if name in self._jigsaw_processes_names:
-                    log_info(f"[WARNING] Detected malicious process: {name} (PID: {pid})");
+                exe_path = process.info['exe'];
+                if name in self._jigsaw_processes_names and exe_path:
+                    log_info(f"\n[WARNING] Detected malicious process: {name} (PID: {pid})");
                     if RELEASE:
                         psutil.Process(pid).kill();
                     log_info("[SUCCESS] Process detained");
+                    
+                    self._malware_paths.append(str(exe_path));
+                    self.__notify();
             except Exception as e:
                 log_error(f"[ERROR] Error while detaining the process {name}: {e}");
 
-    def __detection_by_process_count(self, processes, processes_pids):
+    def __detection_by_process_count(self, processes_pids):
         for name, pids in processes_pids.items():
             if len(pids) > self._permited_processes:
-                log_info(f"[WARNING, MULTIPLE STANCES] {name} - PIDS number: {len(pids)}.");
+                log_info(f"\n[WARNING, MULTIPLE STANCES] {name} - PIDS number: {len(pids)}.");
                 for pid in pids:
                     try:
                         if RELEASE:
                             psutil.Process(pid).kill(); 
                         log_info(f"{name} - PID {pid} killed.");
                     except Exception as e:
-                        log_error(f"[ERROR] Error while detaining the process {name}: {e}");
+                        log_error(f"[ERROR] Error while detaining the process {name}: {e}");       
 
     def __detection_by_process_hash(self, processes):
         hasher: Hasher = Hasher(SHAType.SHA_256);
 
         for process in processes:
             try:
-                name: str = process.info['exe'];
-                if name:
-                    hasher.set_file_path(name);
+                exe_path: str = process.info['exe'];
+                if exe_path:
+                    hasher.set_file_path(exe_path);
                     file_hash = hasher.digest();
                     if file_hash in self._malware_hashes:
                         pid: int = process.info['pid'];
-                        log_info(f"[WARNING, HASH MATCH] Malicious process detected: {name} (PID: {pid})");
+                        log_info(f"\n[WARNING, HASH MATCH] Malicious process detected: {exe_path} (PID: {pid})");
 
                         if RELEASE:
                             psutil.Process(pid).kill();
-                        log_info(f"{name} - PID {pid} killed.");
+                        log_info(f"{exe_path} - PID {pid} killed.");
+                        
+                        self._malware_paths.append(str(exe_path));
+                        self.__notify();
             except Exception as e:
-                log_error(f"[ERROR] Error while detaining the process {name}: {e}");
+                log_error(f"[ERROR] Error while detaining the process {exe_path}: {e}");
+    
+    def __delete_exe(self):
+            try:
+                log_info(f"[INFO] Removing malware");
+                for path in self._malware_paths:
+                    if RELEASE:
+                        os.remove(path);
+                log_info(f"[SUCCESS] Malware obliterated");
+            except Exception as e:
+                log_error(f"[ERROR] Error while deleting malware. Error: {e}");
+
+    def __notify(self):
+        self._malware_event.set();
+        self.__delete_exe();
+        self.__stop();
+
+    def __stop(self):
+        self._malware_event.set();

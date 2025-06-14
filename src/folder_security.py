@@ -1,7 +1,7 @@
 import os
 from pathlib import Path
 import win32security
-import win32con
+import win32file
 
 from utils.logger import log_info, log_error
 
@@ -26,7 +26,7 @@ class FolderSecurity:
                 security_descriptor = win32security.GetFileSecurity(folder_str, win32security.DACL_SECURITY_INFORMATION);
                 access_control_list = win32security.ACL();
 
-                access_control_list.AddAccessDeniedAce(win32security.ACL_REVISION, win32con.FILE_ALL_ACCESS, self._everyone_account);
+                access_control_list.AddAccessDeniedAce(win32security.ACL_REVISION, win32file.FILE_ALL_ACCESS, self._everyone_account);
                 security_descriptor.SetSecurityDescriptorDacl(1, access_control_list, 0);
                 win32security.SetFileSecurity(folder_str, win32security.DACL_SECURITY_INFORMATION, security_descriptor);
 
@@ -41,7 +41,7 @@ class FolderSecurity:
                 security_descriptor = win32security.GetFileSecurity(folder_str, win32security.DACL_SECURITY_INFORMATION)
                 access_control_list = win32security.ACL();
 
-                access_control_list.AddAccessAllowedAce(win32security.ACL_REVISION, win32con.FILE_ALL_ACCESS, self._everyone_account)
+                access_control_list.AddAccessAllowedAce(win32security.ACL_REVISION, win32file.FILE_ALL_ACCESS, self._everyone_account)
                 security_descriptor.SetSecurityDescriptorDacl(1, access_control_list, 0)
                 win32security.SetFileSecurity(folder_str, win32security.DACL_SECURITY_INFORMATION, security_descriptor)
 
@@ -51,5 +51,5 @@ class FolderSecurity:
 
 
     def __get_everyone_account(self):
-        everyone, _, _ = win32security.LookupAccountName("", "Everyone");
+        everyone, _, _ = win32security.LookupAccountName("", "Todos");
         return everyone;
