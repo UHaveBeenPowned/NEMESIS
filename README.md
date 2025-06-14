@@ -28,4 +28,6 @@ In order to compile your own NEMESIS. Open a terminal in the folder NEMESIS:
 
     $ pyinstaller --noconsole --onefile --name nemesis nemesis.py
 
+A new folder called "dist" will appear. Inside the new "nemesis.exe" can be found.
+
 **Note**: To comply this step, you must do the steps found in **"venv configuration"**.
