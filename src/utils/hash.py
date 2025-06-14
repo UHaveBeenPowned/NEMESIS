@@ -1,6 +1,7 @@
-import hashlib
-from utils.logger import log_error
 from enum import Enum
+import hashlib
+
+from utils.logger import log_error
 
 class SHAType(Enum):
     SHA_1   = 1,
