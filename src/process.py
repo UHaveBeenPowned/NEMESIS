@@ -106,7 +106,7 @@ class ProcessHandler:
             except Exception as e:
                 log_error(f"[ERROR] Error while detaining the process {exe_path}: {e}");
     
-    def __delete_exe(self):
+    def __delete_malware(self):
             try:
                 log_info(f"[INFO] Removing malware");
                 for path in self._malware_paths:
@@ -118,7 +118,7 @@ class ProcessHandler:
 
     def __notify(self):
         self._malware_event.set();
-        self.__delete_exe();
+        self.__delete_malware();
         self.__stop();
 
     def __stop(self):
