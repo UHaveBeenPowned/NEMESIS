@@ -6,6 +6,7 @@ import psutil
 import signal
 import sys
 
+from aes import Decryptor
 from utils.logger import log_info, log_error
 from utils.hash import Hasher, SHAType
 
@@ -14,18 +15,18 @@ RELEASE: bool = False;
 class ProcessHandler:
 #public
     def __init__(self, interval: int = 10, permited_processes: int = 10, permited_files_accesed: int = 10):
-        log_info(f'Setting up "ProcessHandler"');
+        log_info(f'[INFO] Setting up "ProcessHandler"');
         self._interval:               int = interval;
         self._permited_processes:     int = permited_processes;
         self._permited_files_accesed: int = permited_files_accesed;
 
         self._malware_paths: list[str] = [];
-        self._monitor_thread = None;
-        self._malware_event = threading.Event();
+        self._monitor_thread           = None;
+        self._malware_event            = threading.Event();
         signal.signal(signal.SIGINT, self.__signal_handler)
 
         self._jigsaw_processes_names: list[str] = ["firefox.exe", "drpbx.exe", "jigsaw.exe", "host.exe"];
-        self._malware_hashes = ["3ae96f73d805e1d3995253db4d910300d8442ea603737a1428b613061e7f61e7"];
+        self._malware_hashes:         list[str] = ["3ae96f73d805e1d3995253db4d910300d8442ea603737a1428b613061e7f61e7"];
     
     def set_interval(self, interval: int):
         self._interval = interval;
@@ -115,10 +116,16 @@ class ProcessHandler:
                 log_info(f"[SUCCESS] Malware obliterated");
             except Exception as e:
                 log_error(f"[ERROR] Error while deleting malware. Error: {e}");
+    
+    def __decrypt_files(self):
+        decrypter: Decryptor = Decryptor();
+        if RELEASE:
+            decrypter.search_and_destroy();
 
     def __notify(self):
         self._malware_event.set();
         self.__delete_malware();
+        self.__decrypt_files();
         self.__stop();
 
     def __stop(self):

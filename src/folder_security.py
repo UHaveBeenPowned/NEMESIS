@@ -7,7 +7,7 @@ from utils.logger import log_info, log_error
 
 class FolderSecurity:
     def __init__(self):
-        log_info(f'Setting up "FolderSecurity"');
+        log_info(f'[INFO] Setting up "FolderSecurity"');
         self._everyone_account = self.__get_everyone_account();
         self._folders = [
             Path(os.getenv('USERPROFILE')) / "Documents",

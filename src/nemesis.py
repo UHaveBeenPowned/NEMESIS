@@ -16,9 +16,9 @@ def main():
 
         process_handler.start_monitor();
         while not process_handler._malware_event.is_set():
-            time.sleep(1)  # Mantén vivo el hilo principal
-            
+            time.sleep(1);
         folder_security.unlock_access();
+    
     except KeyboardInterrupt:
         process_handler.stop();
 
