@@ -27,6 +27,28 @@ class ProcessHandler:
 
         self._jigsaw_processes_names: list[str] = ["firefox.exe", "drpbx.exe", "jigsaw.exe", "host.exe"];
         self._malware_hashes:         list[str] = ["3ae96f73d805e1d3995253db4d910300d8442ea603737a1428b613061e7f61e7"];
+        self._legic_processes:        list[str] = [ "System",
+                                                    "System Idle Process",
+                                                    "csrss.exe",
+                                                    "wininit.exe",
+                                                    "winlogon.exe",
+                                                    "smss.exe",
+                                                    "services.exe",
+                                                    "lsass.exe",
+                                                    "svchost.exe",
+                                                    "explorer.exe",
+                                                    "spoolsv.exe",
+                                                    "dwm.exe",
+                                                    "ctfmon.exe",
+                                                    "taskhostw.exe",
+                                                    "fontdrvhost.exe",
+                                                    "audiodg.exe",
+                                                    "sihost.exe",
+                                                    "RuntimeBroker.exe",
+                                                    "SearchIndexer.exe",
+                                                    "SearchApp.exe",
+                                                    "StartMenuExperienceHost.exe",
+                                                    "ShellExperienceHost.exe" ];
     
     def set_interval(self, interval: int):
         self._interval = interval;
@@ -75,7 +97,7 @@ class ProcessHandler:
 
     def __detection_by_process_count(self, processes_pids):
         for name, pids in processes_pids.items():
-            if len(pids) > self._permited_processes:
+            if len(pids) > self._permited_processes and not self._legic_processes.count(name):
                 log_info(f"\n[WARNING, MULTIPLE STANCES] {name} - PIDS number: {len(pids)}.");
                 for pid in pids:
                     try:
