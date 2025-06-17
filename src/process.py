@@ -4,7 +4,7 @@ import time
 import os
 import psutil
 import signal
-import sys
+import subprocess
 
 from aes import Decryptor
 from utils.logger import log_info, log_error
@@ -96,8 +96,8 @@ class ProcessHandler:
                     self._malware_paths.append(str(exe_path));
             except Exception as e:
                 log_error(f"[ERROR] Error while detaining the process {name}: {e}");
-                    
-        self.__notify();
+        if self._malware_paths:
+            self.__notify();
 
     def __detection_by_process_count(self, processes_pids):
         for name, pids in processes_pids.items():
@@ -130,18 +130,27 @@ class ProcessHandler:
                         self._malware_paths.append(str(exe_path));
             except Exception as e:
                 log_error(f"[ERROR] Error while detaining the process {exe_path}: {e}");
-        
-        self.__notify();
+        if self._malware_paths:
+            self.__notify();
     
     def __delete_malware(self):
-            try:
-                log_info(f"[INFO] Removing malware");
-                for path in self._malware_paths:
+            log_info(f"[INFO] Removing malware");
+            for path in self._malware_paths:
+                try:
                     if RELEASE:
                         os.remove(path);
-                log_info(f"[SUCCESS] Malware obliterated");
-            except Exception as e:
-                log_error(f"[ERROR] Error while deleting malware. Error: {e}");
+                except Exception as e:
+                    log_error(f"[ERROR] Error while deleting malware. Trying with PowerShell.");
+                    try:
+                        subprocess.run(
+                            ["powershell", "-Command", f"Remove-Item -Path '{path}' -Force"],
+                            check=True
+                        )
+                        print("Archivo eliminado.")
+                    except subprocess.CalledProcessError as e:
+                        print(f"No se pudo eliminar el archivo: {e}")
+
+            log_info(f"[SUCCESS] Malware obliterated");
     
     def __decrypt_files(self):
         decrypter: Decryptor = Decryptor();

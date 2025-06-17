@@ -50,4 +50,7 @@ class Decryptor:
             log_error(f"[ERROR] Error while removing encryption: {e}");
 
     def __decode_base64(self, data: str):
-        return base64.b64decode(data);
+        try:
+            return base64.b64decode(data);
+        except Exception as e:
+            log_error(f"[ERROR] Error while decoding key: {e}");
