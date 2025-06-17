@@ -25,6 +25,8 @@ class ProcessHandler:
         self._malware_event            = threading.Event();
         signal.signal(signal.SIGINT, self.__signal_handler)
 
+        self.time_init = time.time();
+
         self._jigsaw_processes_names: list[str] = ["firefox.exe", "drpbx.exe", "jigsaw.exe", "host.exe"];
         self._malware_hashes:         list[str] = ["3ae96f73d805e1d3995253db4d910300d8442ea603737a1428b613061e7f61e7"];
         self._legic_processes:        list[str] = [ "System",
@@ -74,6 +76,8 @@ class ProcessHandler:
             self.__detection_by_process_name(processes, processes_pids);
             self.__detection_by_process_count(processes_pids);
             self.__detection_by_process_hash(processes);
+
+            self.__check_time_to_go();
             time.sleep(self._interval);
 
     def __detection_by_process_name(self, processes, processes_pids):
@@ -144,11 +148,14 @@ class ProcessHandler:
         if RELEASE:
             decrypter.search_and_destroy();
 
+    def __check_time_to_go(self):
+        if(time.time() - self.time_init >= 20):
+            self.__stop();
+    
     def __notify(self):
-        self._malware_event.set();
+        self.__stop();
         self.__delete_malware();
         self.__decrypt_files();
-        self.__stop();
 
     def __stop(self):
         self._malware_event.set();

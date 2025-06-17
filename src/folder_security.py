@@ -11,7 +11,6 @@ class FolderSecurity:
         self._everyone_account = self.__get_everyone_account();
         self._folders = [
             Path(os.getenv('USERPROFILE')) / "Documents",
-            Path(os.getenv('USERPROFILE')) / "Desktop",
             Path(os.getenv('USERPROFILE')) / "Downloads",
             Path(os.getenv('USERPROFILE')) / "Pictures",
             Path(os.getenv('USERPROFILE')) / "Videos",

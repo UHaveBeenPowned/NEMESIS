@@ -18,8 +18,8 @@ def main():
         while not process_handler._malware_event.is_set():
             time.sleep(1);
         folder_security.unlock_access();
-    
-    except KeyboardInterrupt:
+    except Exception as e:
+        folder_security.unlock_access();
         process_handler.stop();
 
     log_info("NEMESIS says: I will come back.");
