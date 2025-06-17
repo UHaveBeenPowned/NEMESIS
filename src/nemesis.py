@@ -15,7 +15,7 @@ def main():
         folder_security.block_access();
 
         process_handler.start_monitor();
-        while not process_handler._malware_event.is_set():
+        while not process_handler._malware_finish.is_set():
             time.sleep(1);
         
         folder_security.unlock_access();
