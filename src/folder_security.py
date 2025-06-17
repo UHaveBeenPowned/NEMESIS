@@ -1,4 +1,5 @@
 import os
+import shutil
 from pathlib import Path
 import win32security
 import win32file
@@ -16,6 +17,10 @@ class FolderSecurity:
             Path(os.getenv('USERPROFILE')) / "Videos",
             Path(os.getenv('USERPROFILE')) / "Music",
             Path(os.getenv('USERPROFILE')) / "AppData" / "Roaming"
+        ];
+        self._usual_folders = [
+            Path(os.getenv('USERPROFILE')) / "AppData" / "Local" / "Drpbx",
+            Path(os.getenv('USERPROFILE')) / "AppData" / "Roaming" / "Frfx"
         ];
 
     def block_access(self):
@@ -48,6 +53,16 @@ class FolderSecurity:
             except Exception as e:
                 log_error(f"[ERROR] Error while restoring access of {folder_str}: {e}")
 
+    def kill_usuals(self):
+        log_info(f'[INFO] Looking for usual suspects');
+        for folder in self._usual_folders:
+            if folder.exists() and folder.is_dir():
+                try:
+                    log_info(f"\n[WARNING] Detected folder {folder.name}");
+                    shutil.rmtree(folder);
+                    log_info(f"[SUCCESS] Deleted folder {folder.name}");
+                except Exception as e:
+                    log_error(f"[ERROR] Error while deleting folder {folder.name}: {e}");
 
     def __get_everyone_account(self):
         everyone, _, _ = win32security.LookupAccountName("", "Todos");
