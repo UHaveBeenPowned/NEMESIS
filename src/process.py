@@ -7,7 +7,6 @@ import signal
 import sys
 
 from aes import Decryptor
-from folder_security import FolderSecurity
 from utils.logger import log_info, log_error
 from utils.hash import Hasher, SHAType
 
@@ -20,13 +19,13 @@ class ProcessHandler:
         self._interval:               int = interval;
         self._permited_processes:     int = permited_processes;
         self._permited_files_accesed: int = permited_files_accesed;
+
         self._malware_paths: list[str] = [];
         self._monitor_thread           = None;
         self._malware_event            = threading.Event();
         signal.signal(signal.SIGINT, self.__signal_handler)
 
         self._time_init = time.time();
-        self._folder_security: FolderSecurity = FolderSecurity();
 
         self._jigsaw_processes_names: list[str] = ["firefox.exe", "drpbx.exe", "jigsaw.exe", "host.exe"];
         self._malware_hashes:         list[str] = ["3ae96f73d805e1d3995253db4d910300d8442ea603737a1428b613061e7f61e7"];
@@ -63,9 +62,6 @@ class ProcessHandler:
         self._permited_files_accesed = permited_files_accesed;
 #public
     def start_monitor(self):
-
-        self._folder_security.block_access();
-
         self._monitor_thread = threading.Thread(target=self.__scan_processes, daemon=True);
         self._monitor_thread.start();
 #private
@@ -82,7 +78,7 @@ class ProcessHandler:
             self.__detection_by_process_hash(processes);
 
             self.__check_time_to_go();
-            time.sleep(self._interval);    
+            time.sleep(self._interval);
 
     def __detection_by_process_name(self, processes, processes_pids):
         for process in processes:
@@ -98,8 +94,8 @@ class ProcessHandler:
                         psutil.Process(pid).kill();
                     log_info("[SUCCESS] Process detained");
                     
-                    self._malware_paths.append(str(exe_path));
-                    self.__notify();
+                self._malware_paths.append(str(exe_path));
+                self.__notify();
             except Exception as e:
                 log_error(f"[ERROR] Error while detaining the process {name}: {e}");
 
@@ -132,8 +128,8 @@ class ProcessHandler:
                             psutil.Process(pid).kill();
                         log_info(f"{exe_path} - PID {pid} killed.");
                         
-                        self._malware_paths.append(str(exe_path));
-                        self.__notify();
+                    self._malware_paths.append(str(exe_path));
+                    self.__notify();
             except Exception as e:
                 log_error(f"[ERROR] Error while detaining the process {exe_path}: {e}");
     
@@ -150,9 +146,7 @@ class ProcessHandler:
     def __decrypt_files(self):
         decrypter: Decryptor = Decryptor();
         if RELEASE:
-            log_info(f'[INFO] Search and destroy');
             decrypter.search_and_destroy();
-        
 
     def __check_time_to_go(self):
         if(time.time() - self._time_init >= 300):
@@ -165,4 +159,3 @@ class ProcessHandler:
 
     def __stop(self):
         self._malware_event.set();
-        self._folder_security.unlock_access();

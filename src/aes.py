@@ -18,15 +18,12 @@ class Decryptor:
         if self._key_b64 or self._plain_key:
             key: bytes = self.__decode_base64(self._key_b64) if self._key_b64 else self._plain_key;
             for root, dirs, _ in os.walk(path, topdown=True):
-                log_info(f'[INFO] searching on {path}');
                 for dir in dirs:
                     for file in dir:
                         try:
                             file_path: Path = Path(root) / dir / file;
                             if file_path.suffix ==  self._extension:
                                 self.__decrypt_file(str(file_path), key);
-                            if(file_path.is_dir):
-                                self.search_and_destroy(file_path);
                         except Exception as e:
                             log_error(f"[ERROR] Error while processing: {e}");
         else:
