@@ -17,10 +17,13 @@ def main():
         process_handler.start_monitor();
         while not process_handler._malware_event.is_set():
             time.sleep(1);
+        
         folder_security.unlock_access();
+        folder_security.kill_usuals();
     except Exception as e:
-        folder_security.unlock_access();
         process_handler.stop();
+        folder_security.unlock_access();
+        folder_security.kill_usuals();
 
     log_info("NEMESIS says: I will come back.");
     
