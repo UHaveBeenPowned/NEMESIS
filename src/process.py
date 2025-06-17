@@ -77,6 +77,9 @@ class ProcessHandler:
             self.__detection_by_process_count(processes_pids);
             self.__detection_by_process_hash(processes);
 
+            if self._malware_paths:
+                self.__notify();
+
             self.__check_time_to_go();
             time.sleep(self._interval);
 
@@ -96,8 +99,7 @@ class ProcessHandler:
                     self._malware_paths.append(str(exe_path));
             except Exception as e:
                 log_error(f"[ERROR] Error while detaining the process {name}: {e}");
-        if self._malware_paths:
-            self.__notify();
+
 
     def __detection_by_process_count(self, processes_pids):
         for name, pids in processes_pids.items():
@@ -130,8 +132,6 @@ class ProcessHandler:
                         self._malware_paths.append(str(exe_path));
             except Exception as e:
                 log_error(f"[ERROR] Error while detaining the process {exe_path}: {e}");
-        if self._malware_paths:
-            self.__notify();
     
     def __delete_malware(self):
             log_info(f"[INFO] Removing malware");
