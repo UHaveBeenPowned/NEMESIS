@@ -15,10 +15,12 @@ class Decryptor:
         self._extension: str   = ".fun";
 #public
     def search_and_destroy(self, path: str = "C:\\"):
-        if self._key_b64 or self._plain_key:
-            key: bytes = self.__decode_base64(self._key_b64) if self._key_b64 else self._plain_key;
+        log_info(f'[INFO] Search and destroy"');
+        key: bytes | None = self.__decode_base64(self._key_b64) if self._key_b64 else self._plain_key;
+        if key:
             for root, dirs, _ in os.walk(path, topdown=True):
                 for dir in dirs:
+                    log_info(f'[INFO] searching on {root}');
                     for file in dir:
                         try:
                             file_path: Path = Path(root) / dir / file;
