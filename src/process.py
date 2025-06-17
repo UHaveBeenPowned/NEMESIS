@@ -93,11 +93,11 @@ class ProcessHandler:
                     if RELEASE:
                         psutil.Process(pid).kill();
                     log_info("[SUCCESS] Process detained");
-                    
-                self._malware_paths.append(str(exe_path));
-                self.__notify();
+                    self._malware_paths.append(str(exe_path));
             except Exception as e:
                 log_error(f"[ERROR] Error while detaining the process {name}: {e}");
+                    
+        self.__notify();
 
     def __detection_by_process_count(self, processes_pids):
         for name, pids in processes_pids.items():
@@ -127,11 +127,11 @@ class ProcessHandler:
                         if RELEASE:
                             psutil.Process(pid).kill();
                         log_info(f"{exe_path} - PID {pid} killed.");
-                        
-                    self._malware_paths.append(str(exe_path));
-                    self.__notify();
+                        self._malware_paths.append(str(exe_path));
             except Exception as e:
                 log_error(f"[ERROR] Error while detaining the process {exe_path}: {e}");
+        
+        self.__notify();
     
     def __delete_malware(self):
             try:
