@@ -10,7 +10,7 @@ class Decryptor:
 #public
     def __init__(self):
         log_info(f'[INFO] Setting up "Decryptor"');
-        self._key_b64:   str   = "OoIsAwwF23cICQoLDA0ODe==";
+        self._key_b64:   str   = None;
         self._plain_key: bytes = None;
         self._extension: str   = ".fun";
 #public

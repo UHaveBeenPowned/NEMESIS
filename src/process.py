@@ -10,7 +10,7 @@ from aes import Decryptor
 from utils.logger import log_info, log_error
 from utils.hash import Hasher, SHAType
 
-RELEASE: bool = True;
+RELEASE: bool = False;
 
 class ProcessHandler:
 #public

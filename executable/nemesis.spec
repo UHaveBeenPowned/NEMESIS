@@ -2,7 +2,7 @@
 
 
 a = Analysis(
-    ['src\\nemesis.py'],
+    ['..\\src\\nemesis.py'],
     pathex=[],
     binaries=[],
     datas=[],
