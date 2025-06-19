@@ -21,6 +21,8 @@ In other versions of Jigsaw this can change, so:
 * If the key its known but is in plain text, set the "self._plain_key" with the known key.
 * If the key is unknown, do not set any variable.
 
+**Note**: In the actual version, the decrypt functionality could not work if the algorithm use an IV for initialization. If this is your case, you can try to fork the proyect and try to implement it :)
+
 # nemesis.exe
 An "nemesis.exe" can be found in the folder "executable". This executable have the RELEASE mode activated and the decryption key setted to "OoIsAwwF23cICQoLDA0ODe==".
 

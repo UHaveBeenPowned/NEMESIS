@@ -18,16 +18,14 @@ class Decryptor:
         log_info(f'[INFO] Search and destroy"');
         key: bytes | None = self.__decode_base64(self._key_b64) if self._key_b64 else self._plain_key;
         if key:
-            for root, dirs, _ in os.walk(path, topdown=True):
-                for dir in dirs:
-                    log_info(f'[INFO] searching on {root}');
-                    for file in dir:
-                        try:
-                            file_path: Path = Path(root) / dir / file;
-                            if file_path.suffix ==  self._extension:
-                                self.__decrypt_file(str(file_path), key);
-                        except Exception as e:
-                            log_error(f"[ERROR] Error while processing: {e}");
+            for root, _, files in os.walk(path, topdown=True):
+                for file in files:
+                    try:
+                        file_path: Path = Path(root) / file;
+                        if file_path.suffix == self._extension:
+                            self.__decrypt_file(str(file_path), key);
+                    except Exception as e:
+                        log_error(f"[ERROR] Error while processing '{file_path}': {e}");
         else:
             log_info(f'[INFO] No key setted, setting down "Decryptor"');
 

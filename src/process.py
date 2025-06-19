@@ -23,7 +23,9 @@ class ProcessHandler:
         self._malware_paths: list[str] = [];
         self._monitor_thread           = None;
         self._malware_event            = threading.Event();
+        self._malware_finish           = threading.Event();
         signal.signal(signal.SIGINT, self.__signal_handler)
+        signal.signal(signal.SIGTERM, self.__signal_handler)
 
         self._time_init = time.time();
 
@@ -66,7 +68,7 @@ class ProcessHandler:
         self._monitor_thread.start();
 #private
     def __signal_handler(self, sig, frame):
-        self.__stop()
+        self.__finished();
 
     def __scan_processes (self):
         while not self._malware_event.is_set():
@@ -159,12 +161,16 @@ class ProcessHandler:
 
     def __check_time_to_go(self):
         if(time.time() - self._time_init >= 300):
-            self.__stop();
+            self.__finished();
     
     def __notify(self):
-        self.__stop();
+        self.__detected();
         self.__delete_malware();
         self.__decrypt_files();
+        self.__finished();
 
-    def __stop(self):
+    def __detected(self):
         self._malware_event.set();
+
+    def __finished(self):
+        self._malware_finish.set();
